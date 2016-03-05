@@ -10,7 +10,10 @@ import config
 
 
 def bag_of_words_vectorizer(datafile, k_features):
-    """ Returns sparse term-document matrix of datafile documents, selects k best features by chi2 test """
+    """
+    Computes sparse term-document matrix of datafile documents, selects k best features by chi2 test.
+    Yields batches of BATCH_SIZE of dense tdm vectors.
+    """
     data = []
     labels = []
 
