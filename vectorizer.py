@@ -1,15 +1,3 @@
-import json
-import numpy as np
-from stop_words import get_stop_words
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-from batcher import batch
-from keras.utils import np_utils
-import config
-from random import shuffle
-from sklearn.preprocessing import normalize, robust_scale
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.base import BaseEstimator
 from math import log
 
