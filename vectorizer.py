@@ -7,36 +7,53 @@ from sklearn.feature_selection import chi2
 from batcher import batch
 from keras.utils import np_utils
 import config
+from random import shuffle
+from sklearn.preprocessing import normalize, robust_scale
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.base import BaseEstimator
+from math import log
 
 
-def bag_of_words_vectorizer(datafile, k_features):
+class GeomFeatureExtractor(BaseEstimator):
     """
-    Computes sparse term-document matrix of datafile documents, selects k best features by chi2 test.
-    Yields batches of BATCH_SIZE of dense tdm vectors and vector of labels, transformed for keras nn.
+    Computes various geometric properties of articles, returns them in pair with title text.
+    Title text is used later to compute probability of article being good by semantic classification.
+    This probability is used as additional feature for gradient boosting.
     """
-    data = []
-    labels = []
+    def __init__(self):
+        pass
 
-    for jsoned_entity in open("data.json", errors="ignore").readlines():
-        entity = json.loads(jsoned_entity)
-        if entity["lang"] == "en":
-            data.append(entity["text"])
-            labels.append(entity["label"])
+    def fit(self, raw_documents):
+        self.fit_transform(raw_documents)
+        return self
 
-    vectorizer = TfidfVectorizer(stop_words=get_stop_words("english"))
-    data = vectorizer.fit_transform(data)
-    data = SelectKBest(chi2, k=k_features).fit_transform(data, labels)
+    def fit_transform(self, raw_documents, y=None):
+        doc_vecs = []
+        for document in raw_documents:
+            total_len = log(document["total_len"])
+            taglen = document["tag_len"]
+            textlen = document["textlen"]
+            titlelen = len(str(document["title"]))
+            descr = str(document["descr"])
+            if descr == "" or descr is None: descr = "1"
+            descrlen = len(descr)
+            if document["lang"] == "en":
+                lang = 1
+            else:
+                lang = 0
+            density = textlen / total_len
 
-    for vector_label_batch in batch(zip(data, labels), config.BATCH_SIZE):
-        vectors = []
-        labels = []
-        for vec_label in vector_label_batch:
-            vectors.append(vec_label[0].toarray())
-            labels.append(vec_label[1])
+            doc_vec = {
+                "geom_features": [total_len, taglen, textlen, titlelen, descrlen, lang, density],
+                "title_text": document["title"]
+            }
+            doc_vecs.append(doc_vec)
+        return doc_vecs
 
-        X = np.vstack(vectors)
-        Y = np_utils.to_categorical(labels, 2)
-        yield X, Y
+    def transform(self, raw_documents):
+        return self.fit_transform(raw_documents)
 
-
-
+    def set_params(self, **parameters):
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+        return self
