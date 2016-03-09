@@ -14,3 +14,12 @@ TEST 2:
     clf: same as test 1
 OUTPUT:
     Basically the same as in test1.
+
+TEST 3:
+    features: test 1 + probability output from tfidf+SVM on titles
+    clf: same
+OUTPUT:
+    F1:
+        Max: 0.88 Min: 0.867 Median: 0.87 Mean: 0.875
+    Precision:
+        Max: 0.94 Min: 0.9 Median: 0.925 Mean: 0.925
