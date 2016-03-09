@@ -1,5 +1,6 @@
 from sklearn.base import BaseEstimator
 from math import log
+from text_metrics import get_totallen, get_text_density, get_taglen, get_textlen
 
 
 class GeomFeatureExtractor(BaseEstimator):
@@ -17,23 +18,34 @@ class GeomFeatureExtractor(BaseEstimator):
 
     def fit_transform(self, raw_documents, y=None):
         doc_vecs = []
-        for document in raw_documents:
-            total_len = log(document["total_len"])
-            taglen = document["tag_len"]
-            textlen = document["textlen"]
-            titlelen = len(str(document["title"]))
-            descr = str(document["descr"])
-            if descr == "" or descr is None: descr = "1"
-            descrlen = len(descr)
-            if document["lang"] == "en":
+        for raw in raw_documents:
+            document = raw["data"]
+
+            title = document["title"]
+            lang = document["language"]
+            article = document["article"]
+            descr = document["description"]
+
+            if descr is None or descr is "":
+                descr = "1"
+            if title is None or title is "":
+                title = "1"
+
+            if lang == "en":
                 lang = 1
             else:
                 lang = 0
-            density = textlen / total_len
+
+            total_len = log(get_totallen(article))
+            textlen = get_textlen(article)
+            titlelen = len(title)
+            taglen = get_taglen(article)
+            density = get_text_density(article)
+            descrlen = len(descr)
 
             doc_vec = {
                 "geom_features": [total_len, taglen, textlen, titlelen, descrlen, lang, density],
-                "title_text": document["title"]
+                "title_text": title
             }
             doc_vecs.append(doc_vec)
         return doc_vecs
