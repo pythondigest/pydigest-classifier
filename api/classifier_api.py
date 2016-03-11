@@ -10,7 +10,6 @@ classifier = joblib.load("classifier_64.pkl")
 @app.route("/api/v1.0/classify/", methods=["POST"])
 def classify():
     json_data = request.get_json(force=True)["links"]
-
     links = []
     for entity in json_data:
         links.append(entity["link"])
@@ -21,4 +20,4 @@ def classify():
     return json.dumps(out)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0")
+    app.run(debug=True)
