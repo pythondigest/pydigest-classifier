@@ -17,7 +17,7 @@ def classify():
 
     predicted = classifier.predict(json_data)
 
-    out = [{i[0]: bool(i[1])} for i in zip(links, predicted)]
+    out = {"links": [{i[0]: bool(i[1])} for i in zip(links, predicted)]}
     return json.dumps(out)
 
 if __name__ == '__main__':
