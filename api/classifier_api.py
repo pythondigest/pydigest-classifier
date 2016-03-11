@@ -4,12 +4,12 @@ from sklearn.externals import joblib
 
 app = Flask(__name__)
 
-classifier = joblib.load("classifier_dump.pkl")
+classifier = joblib.load("classifier_64.pkl")
 
 
 @app.route("/api/v1.0/classify/", methods=["POST"])
 def classify():
-    json_data = request.get_json(force=True)
+    json_data = request.get_json(force=True)["links"]
 
     links = []
     for entity in json_data:
@@ -21,4 +21,4 @@ def classify():
     return json.dumps(out)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0")
