@@ -3,9 +3,6 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-from sklearn.neighbors import KNeighborsClassifier
 
 
 class ChainedClassifier(BaseEstimator, ClassifierMixin):
@@ -51,7 +48,6 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
         for i in range(0, len(geom_features)):
             geom_features[i].append(probs[i][1])
         return self.gradboost.predict_proba(geom_features)
-
 
     def set_params(self, **parameters):
         for parameter, value in parameters.items():
