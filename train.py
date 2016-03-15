@@ -1,12 +1,12 @@
-import sys
-import os
 import json
-from sklearn.pipeline import Pipeline
+import os
+import sys
+
 from sklearn.externals import joblib
+from sklearn.pipeline import Pipeline
 
-from vectorizer import GeomFeatureExtractor
 from classifier import ChainedClassifier
-
+from vectorizer import GeomFeatureExtractor
 
 """
 Trains and dumps the classifier.
@@ -14,7 +14,6 @@ Accepts 2 args: first one is input path, second one is output path
 Classifier is trained on all files with .json extension from input path
 Classifier is saved to the file specified by output path
 """
-
 
 if __name__ == "__main__":
     input_path = sys.argv[1]
@@ -24,14 +23,17 @@ if __name__ == "__main__":
 
     for file in os.listdir(input_path):
         if file.endswith(".json"):
-            raw_docs = json.loads(open(file, errors="ignore").read())
-            for i in raw_docs:
-                input_data.append(i)
-                input_labels.append(i["label"])
+            raw_docs = json.loads(open(os.path.join(input_path, file), errors="ignore").read())
+            for i in raw_docs['links']:
+                if i['data']['article']:
+                    label = int(i["data"]["label"])
+                    del i['data']['label']
+                    input_data.append(i)
+                    input_labels.append(label)
 
     text_clf = Pipeline([('vect', GeomFeatureExtractor()),
-                        ('clf', ChainedClassifier())
-                        ])
+                         ('clf', ChainedClassifier())
+                         ])
 
     text_clf.fit(input_data, input_labels)
     joblib.dump(text_clf, out_path, compress=1)
