@@ -24,10 +24,10 @@ if __name__ == "__main__":
 
     for file in os.listdir(input_path):
         if file.endswith(".json"):
-            raw_docs = json.loads(open(file, errors="ignore").read())
+            raw_docs = json.loads(open(os.path.join(input_path, file), errors="ignore").read())["links"]
             for i in raw_docs:
                 input_data.append(i)
-                input_labels.append(i["label"])
+                input_labels.append(i["data"]["label"])
 
     text_clf = Pipeline([('vect', GeomFeatureExtractor()),
                         ('clf', ChainedClassifier())
