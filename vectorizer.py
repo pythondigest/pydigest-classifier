@@ -25,16 +25,24 @@ class GeomFeatureExtractor(BaseEstimator):
             lang = document["language"]
             article = document["article"]
             descr = document["description"]
+            type = document["type"]
 
             if descr is None or descr is "":
                 descr = "1"
             if title is None or title is "":
                 title = "1"
+            if article is None or article == "":
+                article = "1"
 
             if lang == "en":
                 lang = 1
             else:
                 lang = 0
+
+            if type == "article":
+                type = 1
+            else:
+                type = 0
 
             total_len = log(get_totallen(article))
             textlen = get_textlen(article)
@@ -44,7 +52,7 @@ class GeomFeatureExtractor(BaseEstimator):
             descrlen = len(descr)
 
             doc_vec = {
-                "geom_features": [total_len, taglen, textlen, titlelen, descrlen, lang, density],
+                "geom_features": [total_len, taglen, textlen, titlelen, descrlen, lang, density, type],
                 "title_text": title
             }
             doc_vecs.append(doc_vec)

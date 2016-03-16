@@ -26,14 +26,12 @@ if __name__ == "__main__":
             raw_docs = json.loads(open(os.path.join(input_path, file), errors="ignore").read())
             for i in raw_docs['links']:
                 if i['data']['article']:
-                    label = int(i["data"]["label"])
-                    del i['data']['label']
                     input_data.append(i)
-                    input_labels.append(label)
+                    input_labels.append(i["data"]["label"])
 
     text_clf = Pipeline([('vect', GeomFeatureExtractor()),
-                         ('clf', ChainedClassifier())
-                         ])
+                        ('clf', ChainedClassifier())
+                        ])
 
     text_clf.fit(input_data, input_labels)
     joblib.dump(text_clf, out_path, compress=1)
