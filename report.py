@@ -1,0 +1,35 @@
+import csv
+import sys
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score, f1_score
+
+"""
+Plots confusion matrix and prints some metrics computed on input file (command line arg)
+"""
+
+
+def to_bool(s):
+    if s == "True":
+        return True
+    else:
+        return False
+
+
+input_path = sys.argv[1]
+
+with open(input_path) as csvreport:
+    reportreader = csv.reader(csvreport, delimiter=",")
+    next(reportreader)      # to skip column description header
+    y_true = []
+    y_pred = []
+    for row in reportreader:
+        y_true.append(to_bool(row[0]))
+        y_pred.append(to_bool(row[2]))
+
+conf = confusion_matrix(y_true, y_pred, labels=[True, False])
+print("Precision:", precision_score(y_true, y_pred))
+print("Recall:", recall_score(y_true, y_pred))
+print("Accuracy:", accuracy_score(y_true, y_pred))
+print("F1 score:", f1_score(y_true, y_pred))
+sns.heatmap(conf, annot=True, fmt="d", cbar=False, xticklabels=["Predicted: True", "Predicted: False"], yticklabels=["Real: True", "Real: False"])
+sns.plt.show()
