@@ -3,7 +3,8 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
-
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_selection import SelectKBest, chi2
 
 class ChainedClassifier(BaseEstimator, ClassifierMixin):
     """
@@ -12,41 +13,52 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
         then this probability is appended to geometric features.
     Finally, GradientBoosting makes a prediction, based on geometric features and probability output from bag-of-words model.
     """
-    def __init__(self):
-        self.gradboost = GradientBoostingClassifier(learning_rate=0.01, max_depth=15, n_estimators=30, subsample=0.257)
-        self.knn = Pipeline([('vect', TfidfVectorizer()),
-                         ('clf', SVC(probability=True))
-                         ])
+    def __init__(self, learning_rate=0.01, max_depth=6, min_samples_leaf=20, max_features=None):
+        self.learning_rate = learning_rate
+        self.max_depth = max_depth
+        self.min_samples_leaf = min_samples_leaf
+        self.max_features = max_features
+        self.gradboost = GradientBoostingClassifier(n_estimators=3000, learning_rate=self.learning_rate, max_depth=self.max_depth,
+                                                    min_samples_leaf=self.min_samples_leaf, max_features=self.max_features)
+        self.title_semantic = Pipeline([('vect', TfidfVectorizer()),
+                                        ('clf', SVC(probability=True))
+                                        ])
 
-        self.tfidf_vec = TfidfVectorizer()
 
     def fit(self, X, y):
         title_texts = [i["title_text"] for i in X]
-        self.knn.fit(title_texts, y)
-        probs = self.knn.predict_proba(title_texts)
+        self.title_semantic.fit(title_texts, y)
+        title_probs = self.title_semantic.predict_proba(title_texts)
+
 
         geom_features = [i["geom_features"] for i in X]
         for i in range(0, len(geom_features)):
-            geom_features[i].append(probs[i][1])
-
+            geom_features[i].append(title_probs[i][1])
+        print(self.gradboost.learning_rate)
         self.gradboost.fit(geom_features, y)
 
         return self
 
     def predict(self, X):
         title_texts = [i["title_text"] for i in X]
-        probs = self.knn.predict_proba(title_texts)
+        title_probs = self.title_semantic.predict_proba(title_texts)
+
+
         geom_features = [i["geom_features"] for i in X]
         for i in range(0, len(geom_features)):
-            geom_features[i].append(probs[i][1])
+            geom_features[i].append(title_probs[i][1])
+
         return self.gradboost.predict(geom_features)
 
     def predict_proba(self, X):
         title_texts = [i["title_text"] for i in X]
-        probs = self.knn.predict_proba(title_texts)
+        title_probs = self.title_semantic.predict_proba(title_texts)
+
+
         geom_features = [i["geom_features"] for i in X]
         for i in range(0, len(geom_features)):
-            geom_features[i].append(probs[i][1])
+            geom_features[i].append(title_probs[i][1])
+
         return self.gradboost.predict_proba(geom_features)
 
     def set_params(self, **parameters):
