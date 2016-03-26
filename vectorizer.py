@@ -1,11 +1,9 @@
-from sklearn.base import BaseEstimator
 from math import log
-from text_metrics import get_totallen, get_text_density, get_taglen, get_textlen, get_keyword_frequency
-from bs4 import BeautifulSoup
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import SelectKBest, chi2
-from stop_words import get_stop_words
 
+from bs4 import BeautifulSoup
+from sklearn.base import BaseEstimator
+
+from text_metrics import get_totallen, get_text_density, get_taglen, get_textlen
 
 
 class GeomFeatureExtractor(BaseEstimator):
@@ -14,6 +12,7 @@ class GeomFeatureExtractor(BaseEstimator):
     Title text is used later to compute probability of article being good by semantic classification.
     This probability is used as additional feature for gradient boosting.
     """
+
     def __init__(self):
         pass
 
