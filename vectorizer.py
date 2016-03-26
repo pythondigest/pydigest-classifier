@@ -1,6 +1,11 @@
 from sklearn.base import BaseEstimator
 from math import log
-from text_metrics import get_totallen, get_text_density, get_taglen, get_textlen
+from text_metrics import get_totallen, get_text_density, get_taglen, get_textlen, get_keyword_frequency
+from bs4 import BeautifulSoup
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_selection import SelectKBest, chi2
+from stop_words import get_stop_words
+
 
 
 class GeomFeatureExtractor(BaseEstimator):
@@ -50,10 +55,11 @@ class GeomFeatureExtractor(BaseEstimator):
             taglen = get_taglen(article)
             density = get_text_density(article)
             descrlen = len(descr)
-
+            article_text = BeautifulSoup(article, "html.parser").text
             doc_vec = {
                 "geom_features": [total_len, taglen, textlen, titlelen, descrlen, lang, density, type],
-                "title_text": title
+                "title_text": title,
+                "article_text": article_text
             }
             doc_vecs.append(doc_vec)
         return doc_vecs
