@@ -1,4 +1,6 @@
 Flask>=0.10.1
 scikit-learn>=0.17.1
 beautifulsoup4>=4.4.0
+stop-words>=2015.2.23.1
 SciPy>=0.9
+seaborn>=0.6.0
