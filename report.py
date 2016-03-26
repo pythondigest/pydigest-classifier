@@ -18,13 +18,13 @@ def to_bool(s):
 input_path = sys.argv[1]
 
 with open(input_path) as csvreport:
-    reportreader = csv.reader(csvreport, delimiter=",")
-    next(reportreader)      # to skip column description header
+    reportreader = csv.DictReader(csvreport, delimiter=",")
     y_true = []
     y_pred = []
     for row in reportreader:
-        y_true.append(to_bool(row[0]))
-        y_pred.append(to_bool(row[2]))
+        y_true.append(to_bool(row["moderator"]))
+        y_pred.append(to_bool(row["classificator"]))
+print(len(y_true), sum(y_true))
 
 conf = confusion_matrix(y_true, y_pred, labels=[True, False])
 print("Precision:", precision_score(y_true, y_pred))
