@@ -80,6 +80,9 @@ def update_all_cls():
 def update():
     create_dataset()
     update_cls()
+
+
+def report():
     restart_cls()
     create_report()
     analyze_report()
