@@ -57,6 +57,7 @@ def create_report():
     with cd(DIGEST_FOLDER), prefix('source %s' % DIGEST_ENV_PATH):
         run('rm -f ./media/report.csv')
         with cd(DIGEST_REPO_FOLDER):
+            run('python manage.py mark_all_cls_off')
             run('python manage.py update_cls_check ../dataset/test_set_ids.txt')
             run("python manage.py create_cls_report '../media/report.csv' ../dataset/test_set_ids.txt")
 
@@ -70,9 +71,16 @@ def analyze_report():
             local("%s report.py %s" % (LOCAL_CLS_PYTHON, report_path))
 
 
+def update_all_cls():
+    with cd(DIGEST_FOLDER), prefix('source %s' % DIGEST_ENV_PATH):
+        with cd(DIGEST_REPO_FOLDER):
+            run('python manage.py check_all_cls')
+
+
 def update():
     create_dataset()
     update_cls()
     restart_cls()
     create_report()
     analyze_report()
+    update_all_cls()
