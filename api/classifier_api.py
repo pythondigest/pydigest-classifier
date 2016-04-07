@@ -22,6 +22,11 @@ def classify():
     return json.dumps(out)
 
 
+@app.route('/status')
+def status():
+    return "OK"
+
+
 @app.route('/')
 def to_digest():
     return redirect('https://pythondigest.ru')

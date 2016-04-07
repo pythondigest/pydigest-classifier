@@ -83,7 +83,7 @@ def update():
 
 
 def report():
-    restart_cls()
-    create_report()
+    # restart_cls()
+    # create_report()
     analyze_report()
-    update_all_cls()
+    # update_all_cls()
