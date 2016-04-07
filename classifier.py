@@ -7,6 +7,35 @@ from stop_words import get_stop_words
 from sklearn.feature_selection import SelectKBest, chi2
 import numpy as np
 from sklearn.base import TransformerMixin
+from langid.langid import LanguageIdentifier, model
+import nltk
+import string
+
+identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
+identifier.set_languages(["en", "ru"])
+english_stemmer = nltk.stem.LancasterStemmer()
+russian_stemmer = nltk.stem.snowball.RussianStemmer()
+
+
+def stem_tokens(tokens):
+    stems = []
+    for token in tokens:
+        lang = identifier.classify(token)[0]
+
+        if lang == "ru":
+            stem = russian_stemmer.stem(token)
+        else:
+            stem = english_stemmer.stem(token)
+        stems.append(stem)
+
+    return stems
+
+
+def tokenize(text):
+    tokens = nltk.word_tokenize(text)
+    tokens = [i for i in tokens if i not in string.punctuation]
+    stems = stem_tokens(tokens)
+    return stems
 
 
 class DenseTransformer(TransformerMixin):
@@ -37,21 +66,15 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
         self.gradboost = GradientBoostingClassifier(n_estimators=3000, learning_rate=self.learning_rate, max_depth=self.max_depth,
                                                     min_samples_leaf=self.min_samples_leaf, max_features=self.max_features)
 
-        self.title_semantic = Pipeline([('vect', TfidfVectorizer()),
+        self.title_semantic = Pipeline([('vect', TfidfVectorizer(tokenizer=tokenize, stop_words=(get_stop_words("english") + get_stop_words("russian")))),
                                         ('clf', SVC(probability=True))
                                         ])
-
-        self.article_text_clf = Pipeline([('vect', TfidfVectorizer(stop_words=(get_stop_words("english") + get_stop_words("russian")))),
-                         ('select', SelectKBest(chi2, k=5000)),
-                         ("dense", DenseTransformer()),
-                         ('clf', GradientBoostingClassifier(n_estimators=300, learning_rate=0.1, max_depth=6, min_samples_leaf=20))
-                         ])
 
         self.buzzwords = []
 
     def fit_buzzword_list(self, X, y):
-        vectorizer = TfidfVectorizer(stop_words=(get_stop_words("english") + get_stop_words("russian")))
-        selector = SelectKBest(chi2, k=1000)
+        vectorizer = TfidfVectorizer(tokenizer=tokenize, stop_words=(get_stop_words("english") + get_stop_words("russian")))
+        selector = SelectKBest(chi2, k=5000)
         title_texts = [i["title_text"] for i in X]
         tdm = vectorizer.fit_transform(title_texts)
         selector.fit_transform(tdm, y)
@@ -65,13 +88,12 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
     def buzzword_score(self, article_text):
         if len(article_text) == 0:
             return 0
-        score = sum(article_text.count(i) for i in self.buzzwords) / len(article_text)
+        score = sum(article_text.count(i) for i in self.buzzwords)
         return score
 
     def fit(self, X, y):
 
         self.fit_buzzword_list(X, y)
-
 
         title_texts = [i["title_text"] for i in X]
         self.title_semantic.fit(title_texts, y)
