@@ -2,11 +2,11 @@ import re
 from bs4 import BeautifulSoup
 
 """
-    Functions to compute various geometric properties of article html files.
+    Functions to compute various geometric properties of html files.
     Probably this is a placeholder.
 """
 
-# TODO: performance is too low right now
+# TODO: performance is stupidly low right now
 
 
 def get_text_density(html_string):
@@ -27,3 +27,13 @@ def get_taglen(html_string):
 def get_textlen(html_string):
     textlen = len(BeautifulSoup(html_string, "html.parser").text)
     return textlen
+
+from keyword import kwlist
+kwlist.extend("= [ ] ( ) : , + - * /".split())
+
+
+def get_keyword_frequency(html_string):
+    text = BeautifulSoup(str(html_string), "html.parser").text
+    if len(text) == 0:
+        return 0
+    return sum(text.count(kword) for kword in kwlist)

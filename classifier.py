@@ -18,6 +18,9 @@ russian_stemmer = nltk.stem.snowball.RussianStemmer()
 
 
 def stem_tokens(tokens):
+    """
+    Returns a list of stems from a list of tokens, works for russian and english words.
+    """
     stems = []
     for token in tokens:
         lang = identifier.classify(token)[0]
@@ -32,23 +35,13 @@ def stem_tokens(tokens):
 
 
 def tokenize(text):
+    """
+    Returns a bag of words from a given text string.
+    """
     tokens = nltk.word_tokenize(text)
     tokens = [i for i in tokens if i not in string.punctuation]
     stems = stem_tokens(tokens)
     return stems
-
-
-class DenseTransformer(TransformerMixin):
-
-    def transform(self, X, y=None, **fit_params):
-        return X.todense()
-
-    def fit_transform(self, X, y=None, **fit_params):
-        self.fit(X, y, **fit_params)
-        return self.transform(X)
-
-    def fit(self, X, y=None, **fit_params):
-        return self
 
 
 class ChainedClassifier(BaseEstimator, ClassifierMixin):
@@ -57,6 +50,7 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
     SVM trained on tfidf of titles predicts probability of article being good,
         then this probability is appended to geometric features.
     Finally, GradientBoosting makes a prediction, based on geometric features and probability output from bag-of-words model.
+    ATTENTION: experimental "buzzword_score" feature is implemented in this version, performance is degraded
     """
     def __init__(self, learning_rate=0.01, max_depth=6, min_samples_leaf=20, max_features=None):
         self.learning_rate = learning_rate
@@ -73,6 +67,10 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
         self.buzzwords = []
 
     def fit_buzzword_list(self, X, y):
+        """
+        Creates a list of most valuable features in titles.
+        This list is ised to compute buzzword_score
+        """
         vectorizer = TfidfVectorizer(tokenizer=tokenize, stop_words=(get_stop_words("english") + get_stop_words("russian")))
         selector = SelectKBest(chi2, k=5000)
         title_texts = [i["title_text"] for i in X]
