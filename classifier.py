@@ -1,12 +1,11 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 from stop_words import get_stop_words
 from sklearn.feature_selection import SelectKBest, chi2
 import numpy as np
-from sklearn.base import TransformerMixin
 from langid.langid import LanguageIdentifier, model
 import nltk
 import string
@@ -60,7 +59,7 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
         self.gradboost = GradientBoostingClassifier(n_estimators=3000, learning_rate=self.learning_rate, max_depth=self.max_depth,
                                                     min_samples_leaf=self.min_samples_leaf, max_features=self.max_features)
 
-        self.title_semantic = Pipeline([('vect', TfidfVectorizer(tokenizer=tokenize, stop_words=(get_stop_words("english") + get_stop_words("russian")))),
+        self.title_semantic = Pipeline([('vect', CountVectorizer(tokenizer=tokenize, stop_words=(get_stop_words("english") + get_stop_words("russian")))),
                                         ('clf', SVC(probability=True))
                                         ])
 
@@ -71,7 +70,7 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
         Creates a list of most valuable features in titles.
         This list is ised to compute buzzword_score
         """
-        vectorizer = TfidfVectorizer(tokenizer=tokenize, stop_words=(get_stop_words("english") + get_stop_words("russian")))
+        vectorizer = CountVectorizer(tokenizer=tokenize, stop_words=(get_stop_words("english") + get_stop_words("russian")))
         selector = SelectKBest(chi2, k=5000)
         title_texts = [i["title_text"] for i in X]
         tdm = vectorizer.fit_transform(title_texts)
