@@ -8,9 +8,9 @@ from text_metrics import get_totallen, get_text_density, get_taglen, get_textlen
 
 class GeomFeatureExtractor(BaseEstimator):
     """
-    Computes various geometric properties of articles, returns them in pair with title text.
-    Title text is used later to compute probability of article being good by semantic classification.
-    This probability is used as additional feature for gradient boosting.
+    Computes various geometric properties of articles, returns them in dictionary, paired with article and title text.
+    Language is encoded by simple int value.
+    Title text is used later to compute additional features (classifier.py).
     """
 
     def __init__(self):
@@ -56,7 +56,7 @@ class GeomFeatureExtractor(BaseEstimator):
             descrlen = len(descr)
             article_text = BeautifulSoup(article, "html.parser").text
             doc_vec = {
-                "geom_features": [total_len, taglen, textlen, titlelen, descrlen, lang, density, type],
+                "geom_features": [total_len, textlen, density, titlelen, taglen, descrlen, lang],
                 "title_text": title,
                 "article_text": article_text
             }
