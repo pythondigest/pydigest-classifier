@@ -1,0 +1,288 @@
+default_language_version:
+  python: python3.12
+exclude: ^docs/|/migrations/|Makefile|.devcontainer/devcontainer.json|/project/static/js/libs
+
+repos:
+
+########################################
+############ BASE SETTINGS #############
+########################################
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: check-yaml
+    args: [--unsafe]
+  - id: trailing-whitespace
+    exclude: ^.*\.patch$
+    args: [--markdown-linebreak-ext=md]
+  - id: detect-private-key
+  - id: pretty-format-json
+  # - id: check-added-large-files
+  - id: check-json
+  - id: check-symlinks
+  - id: check-ast
+  - id: check-case-conflict
+  # - id: check-docstring-first
+  - id: check-executables-have-shebangs
+  - id: check-merge-conflict
+  - id: check-toml
+  - id: mixed-line-ending
+  - id: check-vcs-permalinks
+  - id: file-contents-sorter
+    files: ^(\.env.*|\.gitignore|\.dockerignore)$
+  - id: requirements-txt-fixer
+    files: ^(requirements.*\.txt)$
+  - id: end-of-file-fixer
+    exclude: ^.*/VERSION$
+  - id: fix-byte-order-marker
+  - id: fix-encoding-pragma
+    args: [--remove]
+  - id: name-tests-test
+    files: ^tests/(tests_integration|tests_unit)/.*\.py$
+    args: [--django]
+  - id: detect-aws-credentials
+    args: [--allow-missing-credentials]
+  - id: debug-statements
+
+- repo: https://github.com/pre-commit/pygrep-hooks
+  rev: v1.10.0
+  hooks:
+  - id: python-no-log-warn
+  - id: python-no-eval
+  - id: python-use-type-annotations
+  # - id: python-check-blanket-noqa
+  - id: python-no-eval
+  - id: rst-backticks
+  - id: rst-directive-colons
+  - id: rst-inline-touching-normal
+  - id: text-unicode-replacement-char
+
+# - repo: https://github.com/thibaudcolas/curlylint
+#   rev: v0.13.1
+#   hooks:
+#   - id: curlylint
+#     name: curlylint
+#     description: A linter which checks the indentation and the correctness of Jinja-like/HTML templates.
+#     language: python
+#     language_version: python3
+#     entry: curlylint
+#     types_or: [html, jinja, twig]
+#     require_serial: true
+
+######################################
+############ FORMAT CODE #############
+######################################
+
+- repo: https://github.com/pycqa/isort
+  rev: 5.13.2
+  hooks:
+    - id: isort
+      args: ["--profile", "black", "--filter-files"]
+
+# - repo: https://github.com/asottile/reorder_python_imports
+#   rev: v3.12.0
+#   hooks:
+#   - id: reorder-python-imports
+#     args: [--py311-plus]
+
+- repo: https://github.com/Lucas-C/pre-commit-hooks
+  rev: v1.5.5
+  hooks:
+  - id: remove-tabs
+    exclude: ^docs/(make.bat|Makefile)|tests/unit/example/.*$
+
+- repo: https://github.com/PyCQA/autoflake
+  rev: v2.3.1
+  hooks:
+  - id: autoflake
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.8.3
+  hooks:
+    # Run the formatter.
+    - id: ruff-format
+      exclude: ^.*\b(migrations)\b.*$
+    # Run the linter.
+    - id: ruff
+      args: [ --fix ]
+
+# - repo: https://github.com/psf/black
+#   rev: 24.4.2
+#   hooks:
+#   - id: black
+#     args: [--skip-string-normalization, --target-version, py311, --line-length, '120']
+#     exclude: ^.*\b(migrations)\b.*$
+#     language_version: python3
+
+- repo: https://github.com/asottile/blacken-docs
+  rev: 1.19.1
+  hooks:
+  - id: blacken-docs
+
+#######################################
+############ UPGRADE CODE #############
+#######################################
+
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.19.0
+  hooks:
+  - id: pyupgrade
+    args: [--py311-plus, --keep-runtime-typing]
+
+###################################################
+############ FORMAT AND VALIDATE YAML #############
+###################################################
+
+# - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+#   rev: v2.11.0
+#   hooks:
+#   - id: pretty-format-yaml
+#     args: [--autofix, --indent, '2']
+
+
+# - repo: https://github.com/adrienverge/yamllint
+#   rev: v1.32.0
+#   hooks:
+#   - id: yamllint
+#     exclude: .gitlab-ci.yml|.pre-commit-config.yaml
+
+########################################
+############ VALIDATE CODE #############
+########################################
+
+# - repo: https://github.com/codespell-project/codespell
+#   rev: v2.2.6
+#   hooks:
+#   - id: codespell
+#     exclude: ^tests/unit/example/.*$
+#     args: [-w]
+
+# - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
+#   rev: v1.0.6
+#   hooks:
+#   - id: python-bandit-vulnerability-check
+#     # TODO: remove line below after https://github.com/PyCQA/bandit/issues/488
+#     args: [-lll, --recursive, -x, './venv/*,./tests/*,./.pytest_cache/*', .]
+
+# - repo: https://github.com/pre-commit/mirrors-mypy
+#   rev: v1.6.1
+#   hooks:
+#   - id: mypy
+#     args: [--ignore-missing-imports, --install-types, --non-interactive]
+#     files: src
+
+############################################
+############ VALIDATE MARKDOWN #############
+############################################
+
+# - repo: https://github.com/igorshubovych/markdownlint-cli
+#   rev: v0.37.0
+#   hooks:
+#     - id: markdownlint
+
+#############################################
+############ DOCKER AND ANSIBLE #############
+#############################################
+
+# - repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
+#   rev: v0.1.0
+#   hooks:
+#   - id: dockerfilelint
+
+# - repo: https://github.com/IamTheFij/docker-pre-commit
+#   rev: v3.0.1
+#   hooks:
+#   - id: docker-compose-check
+#     files: ^docker-compose.*\.(yaml|yml)$
+
+# - repo: https://github.com/ansible/ansible-lint.git
+#   rev: v6.21.1
+#   hooks:
+#   - id: ansible-lint
+#     args: [ansible]
+
+#########################################
+############ BASH AND SHELL #############
+#########################################
+
+# - repo: https://github.com/lovesegfault/beautysh
+#   rev: v6.2.1
+#   hooks:
+#   - id: beautysh
+
+# # Check shell scripts with ShellCheck
+# # NOTE: ShellCheck must be available in the command search PATHs
+# # https://www.shellcheck.net/
+# # https://github.com/jumanjihouse/pre-commit-hooks#shellcheck
+# - repo: https://github.com/jumanjihouse/pre-commit-hooks
+#   rev: 3.0.0
+#   hooks:
+#     - id: shellcheck
+
+##################################
+############ SECRETS #############
+##################################
+
+# - repo: https://github.com/Yelp/detect-secrets
+#   rev: v1.4.0
+#   hooks:
+#   - id: detect-secrets
+#     args: [--baseline, .secrets.baseline]
+#     exclude: package.lock.json
+
+# # run pip-audit from custom action
+# # because default is not support poetry
+# - repo: https://github.com/koyeung/ko-poetry-audit-plugin.git
+#   rev: 0.8.0a1
+#   hooks:
+#   - id: poetry-audit
+
+# - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+#   rev: v1.3.2
+#   hooks:
+#   - id: python-safety-dependencies-check
+#     files: pyproject.toml
+
+################################
+############ OTHER #############
+################################
+
+# # Check REUSE compliance
+# # https://reuse.software/
+# - repo: https://github.com/fsfe/reuse-tool
+#   rev: v2.1.0
+#   hooks:
+#   - id: reuse
+
+# # Check EditorConfig compliance
+# # https://github.com/editorconfig-checker/editorconfig-checker.python
+# - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+#   rev: 2.7.3
+#   hooks:
+#     - id: editorconfig-checker
+#       alias: ec
+#       exclude: |
+#         (?ix)^(
+#           LICENSES/.*
+#         )$
+
+############ PRE-COMMIT #############
+
+# - repo: meta
+#   hooks:
+#   - id: check-hooks-apply
+#   - id: check-useless-excludes
+
+
+- repo: https://github.com/mondeja/pre-commit-po-hooks
+  rev: v1.7.3
+  hooks:
+    # - id: obsolete-messages
+    # - id: untranslated-messages
+    # - id: fuzzy-messages
+    - id: remove-django-translators
+    # - id: standard-metadata
+    - id: max-lines
+      args: ["10000"]
