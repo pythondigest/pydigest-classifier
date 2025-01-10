@@ -84,4 +84,4 @@ jobs:
           # commit
           git add "./resources/models/classifier.pkl"
           git commit -m "Bot action. Update model"
-          git push origin main
+          git push origin master
