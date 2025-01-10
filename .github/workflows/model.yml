@@ -1,0 +1,84 @@
+name: model
+
+on:
+  schedule:
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  model:
+    name: Update model
+    runs-on: ubuntu-22.04
+    environment: production
+    steps:
+      #----------------------------------------------
+      #       check-out repo and set-up python
+      #----------------------------------------------
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      #----------------------------------------------
+      #  -----  install & configure poetry  -----
+      #----------------------------------------------
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      #----------------------------------------------
+      #       load cached venv if cache exists
+      #----------------------------------------------
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      #----------------------------------------------
+      # install dependencies if cache does not exist
+      #----------------------------------------------
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      #----------------------------------------------
+      # install your root project, if required
+      #----------------------------------------------
+      - name: Install project
+        run: poetry install --no-interaction
+      #----------------------------------------------
+      # Configure Rclone
+      #----------------------------------------------
+      - name: Setup Rclone
+        uses: AnimMouse/setup-rclone@v1
+        with:
+          rclone_config: ${{ secrets.RCLONE_CONFIG }}
+      #----------------------------------------------
+      # Download dataset
+      #----------------------------------------------
+      - name: Download dataset
+        run: |
+          rclone copy yandex-pydigest:backups/pythondigest/zips/ ./resources/zips --progress
+          unzip ./resources/zips/dataset.zip -d ./resources
+      #----------------------------------------------
+      # Create new model
+      #----------------------------------------------
+      - name: Run script
+        run: |
+          poetry run python src/model/train.py "./resources/dataset/" "./resources/models/classifier.pkl"
+      #----------------------------------------------
+      # Upload model
+      #----------------------------------------------
+      - name: Upload model to git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          # commit
+          git add "./resources/models/classifier.pkl"
+          git commit -m "Bot action. Update model"
+          git push origin main
