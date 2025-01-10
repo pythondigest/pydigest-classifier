@@ -140,6 +140,7 @@ resources/old
 resources/pages
 resources/pages.tar.gz
 resources/pages.zip
+resources/zips
 sdist/
 sftp-config.json
 staticfiles/

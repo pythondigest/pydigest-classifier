@@ -1,3 +1,8 @@
+RESOURCES_PATH := ./resources
+RESOURCES_FOLDER =$$(realpath $(RESOURCES_PATH))
+ZIPS_PATH := ./resources/zips
+ZIPS_FOLDER =$$(realpath $(ZIPS_PATH))
+
 pip-tools:
 	pip install -U pip
 	# pip install -U poetry
@@ -29,10 +34,15 @@ run:
 	poetry run python src/api/wsgi.py
 	
 train:
-	poetry run python src/model/train.py "resources/dataset/" "resources/new_model/classifier.pkl"
+	poetry run python src/model/train.py "./resources/dataset/" "./resources/models/classifier.pkl"
 
 report:
-	poetry run python src/model/report.py "resources/dataset/report.csv"
+	poetry run python src/model/report.py "./resources/dataset/report.csv"
 
 test:
 	poetry run pytest 
+
+download:
+	rm -rf ${RESOURCES_FOLDER}/dataset
+	echo ${ZIPS_FOLDER}; rclone copy yandex-pydigest:backups/pythondigest/zips/ ${ZIPS_FOLDER} --progress
+	unzip ${ZIPS_FOLDER}/dataset.zip -d ${RESOURCES_FOLDER}
