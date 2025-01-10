@@ -62,13 +62,14 @@ jobs:
       #----------------------------------------------
       - name: Download dataset
         run: |
-          rclone copy yandex-pydigest:backups/pythondigest/zips/ ./resources/zips --progress
+          rclone copy yandex-pydigest:backups/pythondigest/zips/dataset.zip ./resources/zips/dataset.zip --progress
           unzip ./resources/zips/dataset.zip -d ./resources
       #----------------------------------------------
       # Create new model
       #----------------------------------------------
       - name: Run script
         run: |
+          export PYTHONPATH="${PYTHONPATH}:./"
           poetry run python src/model/train.py "./resources/dataset/" "./resources/models/classifier.pkl"
       #----------------------------------------------
       # Upload model
