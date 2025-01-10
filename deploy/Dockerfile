@@ -72,3 +72,5 @@ WORKDIR $PYSETUP_PATH
 
 # copy application code to WORKDIR
 COPY ./ ${PYSETUP_PATH}
+
+RUN python -c "import nltk; nltk.download('punkt_tab')"
