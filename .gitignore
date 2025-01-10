@@ -122,6 +122,7 @@ lib-cov
 lib/
 lib64/
 local.py
+local/
 local_*.py
 logs
 node_modules/
@@ -135,6 +136,10 @@ pip-log.txt
 project/media/
 resources/dataset
 resources/new_model
+resources/old
+resources/pages
+resources/pages.tar.gz
+resources/pages.zip
 sdist/
 sftp-config.json
 staticfiles/
