@@ -62,7 +62,7 @@ jobs:
       #----------------------------------------------
       - name: Download dataset
         run: |
-          rclone copy yandex-pydigest:backups/pythondigest/zips/dataset.zip ./resources/zips/dataset.zip --progress
+          rclone copy yandex-pydigest:backups/pythondigest/zips/dataset.zip ./resources/zips/ --progress
           unzip ./resources/zips/dataset.zip -d ./resources
       #----------------------------------------------
       # Create new model
