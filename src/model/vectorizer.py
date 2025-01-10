@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from sklearn.base import BaseEstimator
 
 from src.model.text_metrics import (
+    get_keyword_frequency,
     get_taglen,
     get_text_density,
     get_textlen,
@@ -60,8 +61,9 @@ class GeomFeatureExtractor(BaseEstimator):
             density = get_text_density(article)
             descrlen = len(descr)
             article_text = BeautifulSoup(article, "html.parser").text
+            kword_freq = get_keyword_frequency(article) / len(article)
             doc_vec = {
-                "geom_features": [total_len, textlen, density, titlelen, taglen, descrlen, lang],
+                "geom_features": [total_len, textlen, density, titlelen, taglen, descrlen, lang, kword_freq],
                 "title_text": title,
                 "article_text": article_text,
             }

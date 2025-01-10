@@ -7,7 +7,9 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import normalize
 from sklearn.svm import SVC
 from stop_words import get_stop_words
 
@@ -60,13 +62,13 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
     ATTENTION: experimental "buzzword_score" feature is implemented in this version, performance is degraded
     """
 
-    def __init__(self, learning_rate=0.01, max_depth=6, min_samples_leaf=20, max_features=None):
+    def __init__(self, learning_rate=0.01, max_depth=10, min_samples_leaf=20, max_features=6):
         self.learning_rate = learning_rate
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.max_features = max_features
         self.gradboost = GradientBoostingClassifier(
-            n_estimators=3000,
+            n_estimators=5000,
             learning_rate=self.learning_rate,
             max_depth=self.max_depth,
             min_samples_leaf=self.min_samples_leaf,
@@ -77,6 +79,18 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
             [
                 ("vect", get_vectorizer()),
                 ("clf", SVC(probability=True)),
+            ]
+        )
+
+        self.article_semantic = Pipeline(
+            [
+                (
+                    "vect",
+                    CountVectorizer(
+                        tokenizer=tokenize, stop_words=(get_stop_words("english") + get_stop_words("russian"))
+                    ),
+                ),
+                ("clf", KNeighborsClassifier(n_neighbors=5)),
             ]
         )
 
@@ -114,12 +128,16 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
 
         article_texts = [i["article_text"] for i in X]
         buzzword_score = [self.buzzword_score(i) for i in article_texts]
+        self.article_semantic.fit(article_texts, y)
+        article_probs = self.article_semantic.predict_proba(article_texts)
 
         geom_features = [i["geom_features"] for i in X]
         for i in range(0, len(geom_features)):
             geom_features[i].append(title_probs[i][1])
             geom_features[i].append(buzzword_score[i])
-        self.gradboost.fit(geom_features, y)
+            geom_features[i].append(article_probs[i][1])
+        normalized = normalize(geom_features)
+        self.gradboost.fit(normalized, y)
 
         return self
 
@@ -129,12 +147,16 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
 
         article_texts = [i["article_text"] for i in X]
         buzzword_score = [self.buzzword_score(i) for i in article_texts]
+        article_probs = self.article_semantic.predict_proba(article_texts)
 
         geom_features = [i["geom_features"] for i in X]
         for i in range(0, len(geom_features)):
             geom_features[i].append(title_probs[i][1])
             geom_features[i].append(buzzword_score[i])
-        return self.gradboost.predict(geom_features)
+            geom_features[i].append(article_probs[i][1])
+
+        normalized = normalize(geom_features)
+        return self.gradboost.predict(normalized)
 
     def predict_proba(self, X):
         title_texts = [i["title_text"] for i in X]
@@ -142,11 +164,13 @@ class ChainedClassifier(BaseEstimator, ClassifierMixin):
 
         article_texts = [i["article_text"] for i in X]
         buzzword_score = [self.buzzword_score(i) for i in article_texts]
+        article_probs = self.article_semantic.predict_proba(article_texts)
 
         geom_features = [i["geom_features"] for i in X]
         for i in range(0, len(geom_features)):
             geom_features[i].append(title_probs[i][1])
             geom_features[i].append(buzzword_score[i])
+            geom_features[i].append(article_probs[i][1])
         return self.gradboost.predict_proba(geom_features)
 
     def set_params(self, **parameters):
