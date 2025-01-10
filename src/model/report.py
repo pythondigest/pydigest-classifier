@@ -47,6 +47,5 @@ sns.heatmap(
     cbar=False,
     xticklabels=["Predicted: True", "Predicted: False"],
     yticklabels=["Real: True", "Real: False"],
-    annot=True,
 )
 plt.show()
