@@ -10,6 +10,8 @@ on:
   push:
     branches: [ "master", "main" ]
     paths-ignore: [ "docs/**" ]
+  schedule:
+    - cron: "30 4 * * *"
   workflow_dispatch:
 
 concurrency:
