@@ -58,8 +58,8 @@ def test_status(client):
 
 def test_redirect(client):
     response = client.get("/")
-    assert response.status_code == 302
-    assert response.location == "https://pythondigest.ru/"
+    assert response.status_code == 200
+    assert "Hi" in response.data.decode()
 
 
 # Тест на ошибки, когда поле "links" отсутствует

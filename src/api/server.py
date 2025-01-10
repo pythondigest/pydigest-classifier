@@ -3,7 +3,7 @@ import os
 
 import joblib
 import validators
-from flask import Flask, jsonify, redirect, request
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
@@ -42,8 +42,8 @@ def status():
 
 
 @app.route("/")
-def to_digest():
-    return redirect("https://pythondigest.ru/")
+def hello():
+    return "Hi from classifier"
 
 
 if __name__ == "__main__":
