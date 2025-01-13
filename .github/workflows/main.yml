@@ -11,7 +11,7 @@ on:
     branches: [ "master", "main" ]
     paths-ignore: [ "docs/**" ]
   schedule:
-    - cron: "30 4 * * *"
+    - cron: "30 5 15 * *"
   workflow_dispatch:
 
 concurrency:
