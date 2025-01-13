@@ -44,5 +44,5 @@ test:
 
 download:
 	rm -rf ${RESOURCES_FOLDER}/dataset
-	echo ${ZIPS_FOLDER}; rclone copy yandex-pydigest:backups/pythondigest/zips/ ${ZIPS_FOLDER} --progress
+	echo ${ZIPS_FOLDER}; rclone copy yandex-pydigest:backups/pythondigest/zips/dataset.zip ${ZIPS_FOLDER} --progress
 	unzip ${ZIPS_FOLDER}/dataset.zip -d ${RESOURCES_FOLDER}
